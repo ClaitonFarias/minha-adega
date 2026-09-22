@@ -1,0 +1,9 @@
+{
+  "name": "minha-adega",
+  "version": "1.0.0",
+  "private": true,
+  "description": "PWA para gerenciar uma adega de 12 garrafas de vinho.",
+  "scripts": {
+    "start": "npx serve ."
+  }
+}
