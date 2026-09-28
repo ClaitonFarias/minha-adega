@@ -1041,17 +1041,49 @@ function renderizarDashboard() {
       html += `<div class="type-bar-row"><div class="row-top"><span>${tipo}</span><span style="font-weight:700;">${qtd} garrafa(s) <span style="color:#888; font-weight:400;">(${perc}%)</span></span></div><div class="type-track"><div class="type-fill" style="width:${perc}%; background:${cor};"></div></div></div>`;
     }
   }
+
+  html += `<h3 style="font-size:1em; border-bottom:1px solid var(--border); padding-bottom:6px; margin-top:22px;">Consumidos por país</h3>`;
+  if (consumidos.length === 0) {
+    html += `<div style="color:#666; font-size:0.9em; text-align:center; padding:20px;">Nenhum vinho degustado ainda.</div>`;
+  } else {
+    const porPais = {};
+    consumidos.forEach(v => { const p = v.pais_origem || 'Não informado'; porPais[p] = (porPais[p] || 0) + 1; });
+    const paisesOrdenados = Object.entries(porPais).sort((a, b) => b[1] - a[1]);
+    paisesOrdenados.forEach(([pais, qtd]) => {
+      const perc = ((qtd / consumidos.length) * 100).toFixed(0);
+      html += `<div class="type-bar-row"><div class="row-top"><span>${obterBandeira(pais)} ${pais}</span><span style="font-weight:700;">${qtd} garrafa(s) <span style="color:#888; font-weight:400;">(${perc}%)</span></span></div><div class="type-track"><div class="type-fill" style="width:${perc}%; background:var(--gold);"></div></div></div>`;
+    });
+  }
+
   document.getElementById('dashBoardContent').innerHTML = html;
 }
 
 // ===================== BACKUP =====================
-function exportarBackup() {
-  const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(estoque));
+async function exportarBackup() {
+  const nomeArquivo = `adega_backup_${new Date().toISOString().split('T')[0]}.json`;
+  const conteudo = JSON.stringify(estoque, null, 2);
+  const blob = new Blob([conteudo], { type: 'application/json' });
+
+  // Tenta abrir a folha de compartilhamento nativa (iOS/Android) para o usuário escolher onde salvar
+  try {
+    const file = new File([blob], nomeArquivo, { type: 'application/json' });
+    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+      await navigator.share({ files: [file], title: 'Backup da Adega' });
+      toast('Backup compartilhado.', 'success');
+      return;
+    }
+  } catch (err) {
+    if (err && err.name === 'AbortError') return; // usuário cancelou o compartilhamento
+    // se falhar por outro motivo, cai no fallback abaixo
+  }
+
+  // Fallback (navegadores/desktop sem suporte a compartilhamento de arquivos)
+  const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
-  a.setAttribute("href", dataStr);
-  a.setAttribute("download", "adega_backup_" + new Date().toISOString().split('T')[0] + ".json");
+  a.href = url; a.download = nomeArquivo;
   document.body.appendChild(a); a.click(); a.remove();
-  toast('Backup baixado.', 'success');
+  setTimeout(() => URL.revokeObjectURL(url), 2000);
+  toast('Backup baixado. Verifique a pasta Downloads/Arquivos do seu aparelho.', 'success', 4500);
 }
 
 function importarBackup(event) {
