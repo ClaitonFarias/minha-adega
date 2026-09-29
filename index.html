@@ -1068,7 +1068,7 @@ async function exportarBackup() {
   try {
     const file = new File([blob], nomeArquivo, { type: 'application/json' });
     if (navigator.canShare && navigator.canShare({ files: [file] })) {
-      await navigator.share({ files: [file], title: 'Backup da Adega' });
+      await navigator.share({ files: [file] });
       toast('Backup compartilhado.', 'success');
       return;
     }
