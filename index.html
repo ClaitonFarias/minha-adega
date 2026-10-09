@@ -106,14 +106,17 @@
     border: 1px solid #221a1c;
   }
   .prateleira {
-    display: flex; gap: 10px; position: relative;
-    background: linear-gradient(180deg, #1c1416 0%, #120c0e 55%, #0a0607 100%);
-    padding: 16px 10px 10px 10px; border-radius: 7px;
-    border-bottom: 3px solid #060404;
-    box-shadow: 0 5px 10px -4px rgba(0,0,0,0.7);
+    display: flex; gap: 10px; position: relative; z-index: 0;
+    padding: 20px 16px 12px 16px; border-radius: 4px;
+  }
+  .prateleira::before {
+    content: ''; position: absolute; inset: 0; z-index: -1; border-radius: 4px;
+    background: linear-gradient(180deg, #1e1517 0%, #130d0f 55%, #090607 100%);
+    clip-path: polygon(2% 100%, 98% 100%, 91% 0%, 9% 0%);
+    box-shadow: 0 6px 12px -4px rgba(0,0,0,0.8);
   }
   .shelf-light {
-    position: absolute; top: 5px; left: 10%; right: 10%; height: 2px; border-radius: 2px;
+    position: absolute; top: 7px; left: 16%; right: 16%; height: 2px; border-radius: 2px;
     background: linear-gradient(90deg, transparent, rgba(201,162,39,0.75), transparent);
     filter: blur(0.4px); box-shadow: 0 0 8px 1px rgba(201,162,39,0.35);
   }
@@ -123,7 +126,9 @@
   .slot.aberto { background: rgba(201, 130, 47, 0.1); border: 1px solid var(--warning); box-shadow: 0 0 12px rgba(201, 130, 47, 0.22); }
   .slot-flag { position: absolute; top: 5px; left: 7px; font-size: 1.15em; filter: drop-shadow(0px 1px 2px rgba(0,0,0,0.8)); z-index: 2; }
   .slot-tag { position: absolute; top: 5px; right: 7px; font-size: 0.56em; color: var(--warning); font-weight: 700; z-index: 2; background: rgba(0,0,0,0.5); padding: 2px 5px; border-radius: 999px; }
-  .tipo-chip { margin-top: 8px; font-size: 0.6em; font-weight: 700; letter-spacing: 0.4px; padding: 3px 10px; border-radius: 999px; color: rgba(0,0,0,0.75); box-shadow: 0 1px 3px rgba(0,0,0,0.4); }
+  .tipo-chip { margin-top: 8px; font-size: 0.6em; font-weight: 700; letter-spacing: 0.4px; padding: 3px 10px; border-radius: 999px; color: rgba(0,0,0,0.75); box-shadow: 0 1px 3px rgba(0,0,0,0.4); max-width: 90%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .bottle-shadow { width: 62%; height: 7px; border-radius: 50%; background: radial-gradient(ellipse at center, rgba(0,0,0,0.6), transparent 72%); margin-top: -4px; }
+  .bottle-wrap { display: flex; justify-content: center; width: 100%; }
   .slot-empty-wrap { display: flex; flex-direction: column; align-items: center; gap: 6px; opacity: 0.55; }
   .slot-empty-icon { width: 26px; height: 26px; }
   .slot-empty-label { color: #6b5a5e; font-size: 0.68em; line-height: 1.4; font-weight: 600; }
@@ -966,7 +971,8 @@ function renderizarAdega() {
       if (vinho) {
         divSlot.className = `slot ocupado ${vinho.status === 'Aberto' ? 'aberto' : ''}`;
         const chip = infoTipo(vinho.tipo);
-        divSlot.innerHTML = `<div class="slot-flag">${obterBandeira(vinho.pais_origem)}</div>${vinho.status === 'Aberto' ? '<div class="slot-tag">ABERTO</div>' : ''}${gerarSVGIlustracao(vinho.tipo, vinho.status)}<div class="tipo-chip" style="background:${chip.cor};">${vinho.tipo}</div>`;
+        const inclinacao = pos === 'Esquerda' ? '-5deg' : '5deg';
+        divSlot.innerHTML = `<div class="slot-flag">${obterBandeira(vinho.pais_origem)}</div>${vinho.status === 'Aberto' ? '<div class="slot-tag">ABERTO</div>' : ''}<div class="bottle-wrap" style="transform: rotate(${inclinacao});">${gerarSVGIlustracao(vinho.tipo, vinho.status)}</div><div class="bottle-shadow"></div><div class="tipo-chip" style="background:${chip.cor};">${vinho.uva || 'Blend'}</div>`;
         divSlot.onclick = () => abrirModal(vinho.id);
       } else {
         divSlot.className = 'slot';
